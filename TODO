@@ -2,7 +2,7 @@ TODO:
 
 Server:
 
-  * finish implementation of the generic RESTful API for the simple case (PATCH, DELETE...)
+OK* finish implementation of the generic RESTful API for the simple case (PATCH, DELETE...)
   * handle nested resources
   * handle app authentication
   * separate user-private VS world-public data
