@@ -14,10 +14,14 @@ GEM
     columnize (0.8.9)
     debug_inspector (0.0.2)
     debugger-linecache (1.2.0)
+    hashie (3.2.0)
     method_source (0.8.2)
     mongo (1.10.2)
       bson (= 1.10.2)
     multi_json (1.10.1)
+    omniauth (1.2.2)
+      hashie (>= 1.2, < 4)
+      rack (~> 1.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -55,6 +59,7 @@ PLATFORMS
 DEPENDENCIES
   bson_ext
   mongo
+  omniauth
   pry
   pry-byebug
   pry-stack_explorer

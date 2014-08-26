@@ -7,6 +7,8 @@ gem 'sinatra-contrib'
 gem 'mongo'
 gem 'bson_ext'
 
+gem 'omniauth'
+
 group :development do
   gem 'sinatra-reloader'
   gem 'pry'
