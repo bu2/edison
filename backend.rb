@@ -39,8 +39,18 @@ end
 
 # URLs for test and debug
 
-get '/' do
+get '/', provides: :html do
+  '<html><body>
+     <h1>Hello World!</h1>
+   </html></body>' 
+end
+
+get '/', provides: :txt do
   'Hello World!'
+end
+
+get '/', provides: :json do
+  json( status: 'Hello World!' )
 end
 
 
@@ -55,7 +65,7 @@ end
 
 # Authentication & Session management
 
-post '/auth/developer/callback' do
+post '/auth/developer/callback', provides: :json do
   session[:uid] = env['omniauth.auth']['uid']
   session[:user_name] = env['omniauth.auth']['info']['name']
   session[:user_email] = env['omniauth.auth']['info']['email']
@@ -64,7 +74,7 @@ post '/auth/developer/callback' do
 end
 
 
-get '/auth/failure' do
+get '/auth/failure', provides: :json do
   [ 403, json(status: 'forbidden') ]
 end
 
@@ -72,9 +82,7 @@ end
 
 # Generic RESTful API
 
-get '/api/:model' do |model|
-  content_type :json
-
+get '/api/:model', provides: :json do |model|
   result = []
   collection = $db[model]
   collection.find({ owner: session[:uid] }).each do |document|
@@ -88,9 +96,7 @@ get '/api/:model' do |model|
 end
 
 
-get '/api/:model/:id' do |model,id|
-  content_type :json
-
+get '/api/:model/:id', provides: :json do |model,id|
   collection = $db[model]
   document = collection.find_one({ owner: session[:uid], _id: BSON::ObjectId(id) })
   document['id'] = document['_id'].to_s
@@ -100,9 +106,7 @@ get '/api/:model/:id' do |model,id|
 end
 
 
-post '/api/:model' do |model|
-  content_type :json
-
+post '/api/:model', provides: :json do |model|
   json = JSON.parse(request.body.read)
   json['owner'] = session[:uid]
 
@@ -113,9 +117,7 @@ post '/api/:model' do |model|
 end
 
 
-put '/api/:model/:id' do |model,id|
-  content_type :json
-
+put '/api/:model/:id', provides: :json do |model,id|
   json = JSON.parse(request.body.read)
   json['owner'] = session[:uid]
 
@@ -126,9 +128,7 @@ put '/api/:model/:id' do |model,id|
 end
 
 
-patch '/api/:model/:id' do |model, id|
-  content_type :json
-
+patch '/api/:model/:id', provides: :json do |model, id|
   json = JSON.parse(request.body.read)
   json['owner'] = session[:uid]
 
@@ -139,9 +139,7 @@ patch '/api/:model/:id' do |model, id|
 end
 
 
-delete '/api/:model/:id' do |model,id|
-  content_type :json
-
+delete '/api/:model/:id', provides: :json do |model,id|
   collection = $db[model]
   collection.remove({ owner: session[:uid], _id: BSON::ObjectId(id) }, { limit: 1 })
 
@@ -149,9 +147,7 @@ delete '/api/:model/:id' do |model,id|
 end
 
 
-post '/api/:model/find' do |model|
-  content_type :json
-
+post '/api/:model/find', provides: :json do |model|
   json = JSON.parse(request.body.read)
   json['owner'] = session[:uid]
   
@@ -166,4 +162,5 @@ post '/api/:model/find' do |model|
 
   json result
 end
+
 

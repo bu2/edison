@@ -1,9 +1,10 @@
 ENV['RACK_ENV'] = 'test'
 
-require './backend'
 require 'test/unit'
 require 'rack/test'
 require 'json'
+
+require './backend'
 
 
 
@@ -61,7 +62,7 @@ class BackendTest < Test::Unit::TestCase
   end
 
   def add_homer
-    post('/api/people', homer.to_json, { 'Content-Type' => 'application/json' })
+    post('/api/people', homer.to_json, { 'CONTENT_TYPE' => 'application/json' })
     JSON.parse(last_response.body)['id']
   end
 
@@ -70,6 +71,8 @@ class BackendTest < Test::Unit::TestCase
   # Hello test
 
   def test_it_says_hello_world
+    header 'Accept', 'text/plain'
+
     get '/'
 
     assert last_response.ok?
@@ -135,7 +138,7 @@ class BackendTest < Test::Unit::TestCase
   def test_replacing_homer_by_marge
     authenticate_as_bob
     id = add_homer
-    put("/api/people/#{id}", marge.to_json, { 'Content-Type' => 'application/json' })
+    put("/api/people/#{id}", marge.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
     assert_equal id, JSON.parse(last_response.body)['id']
@@ -154,7 +157,7 @@ class BackendTest < Test::Unit::TestCase
   def test_mutating_homer
     authenticate_as_bob
     id = add_homer
-    patch("/api/people/#{id}", homer_patch.to_json, { 'Content-Type' => 'application/json' })
+    patch("/api/people/#{id}", homer_patch.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
     assert_equal id, JSON.parse(last_response.body)['id']
@@ -197,7 +200,7 @@ class BackendTest < Test::Unit::TestCase
 
   def test_finding_people
     authenticate_as_bob
-    post('/api/people/find', { 'birthdate' => { '$lt' => '1955-01-01' } }.to_json, { 'Content-Type' => 'application/json' })
+    post('/api/people/find', { 'birthdate' => { '$lt' => '1955-01-01' } }.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
     result = JSON.parse(last_response.body)
@@ -234,7 +237,7 @@ class BackendTest < Test::Unit::TestCase
       get "/api/people/#{id}"
     end
 
-    post('/api/people/find', { owner: $bob_auth_hash['uid'] }.to_json, { 'Content-Type' => 'application/json' })
+    post('/api/people/find', { owner: $bob_auth_hash['uid'] }.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
     result = JSON.parse(last_response.body)
