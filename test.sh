@@ -5,7 +5,7 @@ echo '# GET /api/people (before authentication!)'
 echo
 echo
 echo
-echo '# POST /auth/developer name="Bob" email="bob@yankee.com"'
+echo '# POST /auth/developer/callback name="Bob" email="bob@yankee.com"'
 (curl -s -L -c cookie -F name="Bob" -F email="bob@yankee.com" http://localhost:4567/auth/developer/callback && echo) | jq '.'
 echo
 echo

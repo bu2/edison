@@ -15,3 +15,7 @@ group :development do
   gem 'pry-byebug'
   gem 'pry-stack_explorer'
 end
+
+group :test do
+  gem 'rack-test'
+end

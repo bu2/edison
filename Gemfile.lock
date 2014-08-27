@@ -63,6 +63,7 @@ DEPENDENCIES
   pry
   pry-byebug
   pry-stack_explorer
+  rack-test
   sinatra
   sinatra-contrib
   sinatra-reloader

@@ -3,10 +3,13 @@ TODO:
 Server:
 
 OK* finish implementation of the generic RESTful API for the simple case (PATCH, DELETE...)
-  * handle nested resources
-  * handle app authentication
-  * separate user-private VS world-public data
-  * handle user-specific authentication
+OK  * app authentication
+OK  * user-specific authentication
+OK  * user-private data
+  * world-public data
+  * ACL and data peer to peer sharing
+  * nested resources
+  * error handling
 
 Cient:
 
