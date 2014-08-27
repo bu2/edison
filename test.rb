@@ -24,7 +24,6 @@ $john_auth_hash = {
   "credentials"=>{}, "extra"=>{}
 }
 
-# OmniAuth.config.mock_auth[:developer] = OmniAuth::AuthHash.new(bob_auth_hash)
 OmniAuth.config.test_mode = true
 
 
@@ -41,12 +40,12 @@ class BackendTest < Test::Unit::TestCase
 
   def authenticate_as_bob
     OmniAuth.config.add_mock :developer, $bob_auth_hash
-    post('/auth/developer/callback', params: {} )
+    post('/auth/developer/callback')
   end
 
   def authenticate_as_john
     OmniAuth.config.add_mock :developer, $john_auth_hash
-    post('/auth/developer/callback', params: {} )
+    post('/auth/developer/callback')
   end
 
   def homer
@@ -66,13 +65,23 @@ class BackendTest < Test::Unit::TestCase
     JSON.parse(last_response.body)['id']
   end
 
+  def parse(json_string)
+    JSON.parse(json_string)
+  end
+
+  def parse_and_clean(json_string)
+    result = parse(json_string)
+    result.delete('id')
+    result.delete('owner')
+    result
+  end
+
 
   
   # Hello test
 
   def test_it_says_hello_world
     header 'Accept', 'text/plain'
-
     get '/'
 
     assert last_response.ok?
@@ -127,9 +136,7 @@ class BackendTest < Test::Unit::TestCase
     get "/api/people/#{id}"
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
-    result.delete('id')
-    result.delete('owner')
+    result = parse_and_clean(last_response.body)
     assert_equal homer, result
   end
 
@@ -146,9 +153,7 @@ class BackendTest < Test::Unit::TestCase
     get "/api/people/#{id}"
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
-    result.delete('id')
-    result.delete('owner')
+    result = parse_and_clean(last_response.body)
     assert_equal marge, result
   end
 
@@ -165,9 +170,7 @@ class BackendTest < Test::Unit::TestCase
     get "/api/people/#{id}"
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
-    result.delete('id')
-    result.delete('owner')
+    result = parse_and_clean(last_response.body)
     assert_equal homer.merge(homer_patch), result
   end
 
@@ -203,7 +206,7 @@ class BackendTest < Test::Unit::TestCase
     post('/api/people/find', { 'birthdate' => { '$lt' => '1955-01-01' } }.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
+    result = parse(last_response.body)
     assert_equal Array, result.class
     result.each do |person|
       assert person['birthdate'] <= '1955-01-01'
@@ -218,7 +221,7 @@ class BackendTest < Test::Unit::TestCase
     get '/api/people'
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
+    result = parse(last_response.body)
     assert_equal Array, result.class
     result.each do |person|
       assert_equal $bob_auth_hash['uid'], person['owner']
@@ -240,7 +243,7 @@ class BackendTest < Test::Unit::TestCase
     post('/api/people/find', { owner: $bob_auth_hash['uid'] }.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
-    result = JSON.parse(last_response.body)
+    result = parse(last_response.body)
     assert_equal Array, result.class
     result.each do |person|
       assert person['owner'] != $bob_auth_hash['uid']

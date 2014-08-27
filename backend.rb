@@ -53,12 +53,13 @@ get '/', provides: :json do
   json( status: 'Hello World!' )
 end
 
+if development?
+  get '/debug' do
+    require 'pry'
+    binding.pry
 
-get '/debug' do
-  require 'pry'
-  binding.pry
-
-  'Done.'
+    'Done.'
+  end
 end
 
 
