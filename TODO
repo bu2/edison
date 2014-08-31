@@ -2,14 +2,19 @@ TODO:
 
 Server:
 
-OK* finish implementation of the generic RESTful API for the simple case (PATCH, DELETE...)
+OK  * finish implementation of the generic RESTful API for the simple case (PATCH, DELETE...)
 OK  * app authentication
 OK  * user-specific authentication
 OK  * user-private data
   * world-public data
   * ACL and data peer to peer sharing
-  * nested resources
   * error handling
+  * tierce authentication
+  * assets
+  * nested resources
+  * push notifications
+  
+
 
 Cient:
 

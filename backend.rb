@@ -26,6 +26,47 @@ module BackendHelpers
     !session[:uid].nil?
   end
 
+  def collection
+    $db[params[:model]]
+  end
+
+  def authorization(predicates = {})
+    predicates.merge({ owner: session[:uid] })
+  end
+
+  def selection_predicates(predicates = {})
+    predicates.merge(authorization)
+  end
+
+  def insertion_attributes(predicates = {})
+    predicates.merge(authorization)
+  end
+
+  def update_attributes(predicates = {})
+    predicates.merge(authorization)
+  end
+
+  def clean_one_result(result)
+    result['id'] = result['_id'].to_s
+    result.delete '_id'
+    result
+  end
+
+  def clean_result(result)
+    new_result = nil
+    if result.is_a? Mongo::Cursor
+      new_result = []
+      result.each { |one_result| new_result << clean_one_result(one_result) }
+    elsif result.is_a? BSON::OrderedHash
+      new_result = clean_one_result(result)
+    elsif result.nil?
+      # new_result = nil      
+    else
+      raise 'Unhandled Mongo DB result type !'
+    end
+    new_result
+  end
+
 end
 helpers BackendHelpers
 
@@ -83,85 +124,51 @@ end
 
 # Generic RESTful API
 
-get '/api/:model', provides: :json do |model|
-  result = []
-  collection = $db[model]
-  collection.find({ owner: session[:uid] }).each do |document|
-    id = document['_id']
-    document.delete '_id'
-    document['id'] = id.to_s
-    result << document
-  end
 
-  json result
+
+get '/api/:model', provides: :json do |model|
+  result = collection.find(selection_predicates)
+  json clean_result(result)
 end
 
 
 get '/api/:model/:id', provides: :json do |model,id|
-  collection = $db[model]
-  document = collection.find_one({ owner: session[:uid], _id: BSON::ObjectId(id) })
-  document['id'] = document['_id'].to_s
-  document.delete '_id'
-
-  json document
+  result = collection.find_one(selection_predicates({ _id: BSON::ObjectId(id) }))
+  json clean_result(result)
 end
 
 
 post '/api/:model', provides: :json do |model|
   json = JSON.parse(request.body.read)
-  json['owner'] = session[:uid]
-
-  collection = $db[model]
-  id = collection.insert(json)
-
+  id = collection.insert(insertion_attributes(json))
   json( id: id.to_s )
 end
 
 
 put '/api/:model/:id', provides: :json do |model,id|
   json = JSON.parse(request.body.read)
-  json['owner'] = session[:uid]
-
-  collection = $db[model]
-  collection.update({ owner: session[:uid], _id: BSON::ObjectId(id) }, json)
-
-  json(id: id.to_s )
+  collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), update_attributes(json))
+  json( id: id.to_s )
 end
 
 
 patch '/api/:model/:id', provides: :json do |model, id|
   json = JSON.parse(request.body.read)
-  json['owner'] = session[:uid]
-
-  collection = $db[model]
-  collection.update({ owner: session[:uid], _id: BSON::ObjectId(id) }, { '$set' => json })
-
-  json(id: id.to_s)
+  collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), { '$set' => update_attributes(json) })
+  json( id: id.to_s )
 end
 
 
 delete '/api/:model/:id', provides: :json do |model,id|
-  collection = $db[model]
-  collection.remove({ owner: session[:uid], _id: BSON::ObjectId(id) }, { limit: 1 })
-
+  collection.remove(selection_predicates({ _id: BSON::ObjectId(id) }), { limit: 1 })
   json(status: 'ok')
 end
 
 
 post '/api/:model/find', provides: :json do |model|
   json = JSON.parse(request.body.read)
-  json['owner'] = session[:uid]
-  
-  result = []
-  collection = $db[model]
-  collection.find(json).each do |document|
-    id = document['_id']
-    document.delete '_id'
-    document['id'] = id.to_s
-    result << document
-  end
-
-  json result
+  result = collection.find(selection_predicates(json))
+  json clean_result(result)
 end
 
 

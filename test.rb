@@ -184,9 +184,8 @@ class BackendTest < Test::Unit::TestCase
     assert last_response.ok?
     assert_equal 'ok', JSON.parse(last_response.body)['status']
 
-    assert_raise NoMethodError, 'Homer still here!' do
-      get "/api/people/#{id}"
-    end
+    get "/api/people/#{id}"
+    assert_equal 'null', last_response.body
   end
 
 
@@ -235,10 +234,9 @@ class BackendTest < Test::Unit::TestCase
     id = add_homer
 
     authenticate_as_john
-    
-    assert_raise NoMethodError do
-      get "/api/people/#{id}"
-    end
+
+    get "/api/people/#{id}"
+    assert_equal 'null', last_response.body
 
     post('/api/people/find', { owner: $bob_auth_hash['uid'] }.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
