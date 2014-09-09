@@ -69,11 +69,14 @@ class BackendTest < Test::Unit::TestCase
     JSON.parse(json_string)
   end
 
+  def clean(json)
+    json.delete('id')
+    json.delete('owner')
+    json
+  end
+
   def parse_and_clean(json_string)
-    result = parse(json_string)
-    result.delete('id')
-    result.delete('owner')
-    result
+    clean(parse(json_string))
   end
 
 
@@ -97,7 +100,7 @@ class BackendTest < Test::Unit::TestCase
     follow_redirect!
 
     assert_equal 403, last_response.status
-    assert_equal 'forbidden', JSON.parse(last_response.body)['status']
+    assert_equal 'forbidden', parse(last_response.body)['status']
   end
 
 
@@ -106,7 +109,7 @@ class BackendTest < Test::Unit::TestCase
     post('/auth/developer/callback', params: { name: 'Bob', email: 'bob@yankee.com' })
 
     assert last_response.ok?
-    assert_equal 'ok', JSON.parse(last_response.body)['status']
+    assert_equal 'ok', parse(last_response.body)['status']
   end
 
 
@@ -148,7 +151,7 @@ class BackendTest < Test::Unit::TestCase
     put("/api/people/#{id}", marge.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
-    assert_equal id, JSON.parse(last_response.body)['id']
+    assert_equal id, parse(last_response.body)['id']
 
     get "/api/people/#{id}"
 
@@ -165,7 +168,7 @@ class BackendTest < Test::Unit::TestCase
     patch("/api/people/#{id}", homer_patch.to_json, { 'CONTENT_TYPE' => 'application/json' })
 
     assert last_response.ok?
-    assert_equal id, JSON.parse(last_response.body)['id']
+    assert_equal id, parse(last_response.body)['id']
 
     get "/api/people/#{id}"
 
@@ -182,7 +185,7 @@ class BackendTest < Test::Unit::TestCase
     delete "/api/people/#{id}"
 
     assert last_response.ok?
-    assert_equal 'ok', JSON.parse(last_response.body)['status']
+    assert_equal 'ok', parse(last_response.body)['status']
 
     get "/api/people/#{id}"
     assert_equal 'null', last_response.body
@@ -195,7 +198,7 @@ class BackendTest < Test::Unit::TestCase
     get '/api/people'
 
     assert last_response.ok?
-    assert_equal Array, JSON.parse(last_response.body).class
+    assert_equal Array, parse(last_response.body).class
   end
 
 
@@ -236,6 +239,7 @@ class BackendTest < Test::Unit::TestCase
     authenticate_as_john
 
     get "/api/people/#{id}"
+
     assert_equal 'null', last_response.body
 
     post('/api/people/find', { owner: $bob_auth_hash['uid'] }.to_json, { 'CONTENT_TYPE' => 'application/json' })
