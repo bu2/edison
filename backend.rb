@@ -86,13 +86,16 @@ get '/', provides: :html do
    </html></body>' 
 end
 
+
 get '/', provides: :txt do
   'Hello World!'
 end
 
+
 get '/', provides: :json do
   json( status: 'Hello World!' )
 end
+
 
 if development?
   get '/debug' do
@@ -123,8 +126,6 @@ end
 
 
 # Generic RESTful API
-
-
 
 get '/api/:model', provides: :json do |model|
   result = collection.find(selection_predicates)

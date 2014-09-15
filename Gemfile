@@ -19,7 +19,11 @@ group :development do
 end
 
 group :test do
-  gem 'rack-test'
   gem 'rspec'
-#  gem 'cucumber'
+  gem 'cucumber'
+
+  gem 'rack-test'
+  gem 'json_spec'
+
+  gem 'syntax'
 end

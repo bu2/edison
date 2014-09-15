@@ -16,7 +16,7 @@ end
 
 
 
-RSpec.describe 'Authorization', authorization: true do
+RSpec.describe 'Authentication', authentication: true do
   
   specify 'Unauthenticated API access is forbidden' do
     get '/api/people'
