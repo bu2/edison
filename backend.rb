@@ -31,7 +31,7 @@ module BackendHelpers
   end
 
   def authorization(predicates = {})
-    predicates.merge({ owner: session[:uid] })
+    predicates.merge({ _owner: session[:uid] })
   end
 
   def selection_predicates(predicates = {})
@@ -47,8 +47,7 @@ module BackendHelpers
   end
 
   def clean_one_result(result)
-    result['id'] = result['_id'].to_s
-    result.delete '_id'
+    result['_id'] = result['_id'].to_s
     result
   end
 

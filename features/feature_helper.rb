@@ -1,3 +1,5 @@
+$mongo = Mongo::MongoClient.new
+$db = $mongo['app']
 
 $bob_auth_hash = { 
   "provider"=>"developer",
@@ -32,7 +34,7 @@ def authenticate_as_john
 end
 
 def parse(json_string)
-  JSON.parse(json_string)
+  MultiJson.load(json_string)
 end
 
 def last_json

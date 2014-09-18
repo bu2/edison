@@ -11,6 +11,8 @@ gem 'bson_ext'
 
 gem 'omniauth'
 
+gem 'multi_json'
+
 group :development do
   gem 'sinatra-reloader'
   gem 'pry'
@@ -25,5 +27,6 @@ group :test do
   gem 'rack-test'
   gem 'json_spec'
 
+  gem 'activesupport'
   gem 'syntax'
 end

@@ -2,7 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 require 'test/unit'
 require 'rack/test'
-require 'json'
+require 'multi_json'
 
 require './backend'
 
@@ -62,11 +62,11 @@ class BackendTest < Test::Unit::TestCase
 
   def add_homer
     post('/api/people', homer.to_json, { 'CONTENT_TYPE' => 'application/json' })
-    JSON.parse(last_response.body)['id']
+    MultiJson.load(last_response.body)['id']
   end
 
   def parse(json_string)
-    JSON.parse(json_string)
+    MultiJson.load(json_string)
   end
 
   def clean(json)

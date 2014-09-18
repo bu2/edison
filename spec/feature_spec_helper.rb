@@ -60,7 +60,7 @@ def add_homer
 end
 
 def parse(json_string)
-  JSON.parse(json_string)
+  MultiJson.load(json_string)
 end
 
 def clean(json)
