@@ -131,3 +131,18 @@ Feature: RESTfulness
     """
     null
     """
+
+  Scenario: Getting the list of objects
+    Given the system only knows those Buildings:
+    | _id                      | label     | level | _owner         |
+    | 541816f042e7d8204d000001 | Town Hall |     3 | bob@sponge.com |
+    | 541816f042e7d8204d000002 | Army Camp |     3 | bob@sponge.com |
+    | 541816f042e7d8204d000003 | Gold Mine |     3 | bob@sponge.com |
+    When client requests GET /api/buildings
+    Then response status should be 200
+    And response body should be JSON:
+    """
+    [ { "_id" : "541816f042e7d8204d000001", "label" : "Town Hall", "level" : "3", "_owner" : "bob@sponge.com" },
+    { "_id" : "541816f042e7d8204d000002", "label" : "Army Camp", "level" : "3", "_owner" : "bob@sponge.com" },
+    { "_id" : "541816f042e7d8204d000003", "label" : "Gold Mine", "level" : "3", "_owner" : "bob@sponge.com" } ]
+    """

@@ -16,6 +16,16 @@ Given(/^the system knows those (\w+):$/) do |model, table|
   end
 end
 
+Given(/^the system only knows those (\w+):$/) do |model, table|
+  collection = $db[model.underscore.pluralize]
+  data = table.hashes
+  collection.drop
+  data.each do |json|
+    json['_id'] = BSON::ObjectId(json['_id'])
+    collection.save(json)
+  end
+end
+
 
 
 Then(/^(\w+) with id "(.*?)" should be JSON:$/) do |model, id, expected_json|
