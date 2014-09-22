@@ -40,3 +40,17 @@ end
 def last_json
   last_response.body
 end
+
+def typify(arg)
+  result = arg
+  if arg.empty?
+    result = nil
+  else
+    begin
+      result = Integer(arg)
+    rescue ArgumentError
+      # ... cascading cast ordered by logical priority (as needed only) ...
+    end
+  end
+  result
+end
