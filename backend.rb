@@ -50,13 +50,13 @@ module BackendHelpers
   end
 
   def check_update(result, id = '<unknown>')
-    if result['ok'] != 1.0 or result['n'] != 1 or result['updatedExisting'] != true
+    if result['ok'] != 1 or result['n'] != 1
       raise ObjectDoesNotExist.new "Object with _id #{id} does not exist."
     end
   end
 
   def check_delete(result, id = '<unknown>')
-    if result['ok'] != 1.0 or result['n'] != 1
+    if result['ok'] != 1 or result['n'] != 1
       raise ObjectDoesNotExist.new "Object with _id #{id} does not exist."
     end
   end
