@@ -1,5 +1,5 @@
 Feature: Access Control
-  The backend provides Public/Private/Role-based access control for APIs
+  The backend provides Public/Private/Role-based/ACL access control
 
   Background:
     Given client accepts JSON
@@ -180,3 +180,28 @@ Feature: Access Control
     { "_owner": "bob@sponge.com" }
     """
     Then response status should be 422
+
+  Scenario: John can read objects from Bob if he has read permission
+    Given the system only knows those Buildings:
+    | _id                      | label     | level | _owner         | _tags                                                                                                                   |
+    | 541816f042e7d8204d000001 | Town Hall |     3 | bob@sponge.com | [ ]                                                                                                                    |
+    | 541816f042e7d8204d000002 | Army Camp |     3 | john@doe.com   | [ { "_target" : [ "bob@sponge.com", "someoneelse" ], "_permissions" : [ { "_read" : true } ] } ] |
+    | 541816f042e7d8204d000003 | Gold Mine |     3 | bob@sponge.com | [ { "_target" : [ "foo", "john@doe.com", "bar" ], "_permissions" : [ { "_read" : true } ] } ]     |
+    And client is authenticated as John
+    When client requests GET /api/buildings
+    Then response status should be 200
+    And response body should be JSON:
+    """
+    [ { "_id" : "541816f042e7d8204d000002", "label" : "Army Camp", "level" : 3, "_owner" : "john@doe.com", "_tags" : [ { "_target" : [ "bob@sponge.com", "someoneelse" ], "_permissions" : [ { "_read" : true } ] } ] },
+{ "_id" : "541816f042e7d8204d000003", "label" : "Gold Mine", "level" : 3, "_owner" : "bob@sponge.com", "_tags" : [ { "_target" : [ "john@doe.com" ], "_permissions" : [ { "_read" : true } ] } ] } ]
+    """
+    When client requests GET /api/buildings/541816f042e7d8204d000003
+    Then response status should be 200
+    And response body should be JSON:
+    """
+    { "_id" : "541816f042e7d8204d000003", 
+      "label" : "Gold Mine",
+      "level" : 3,
+      "_owner" : "bob@sponge.com",
+      "_tags" : [ { "_target" : [ "john@doe.com" ], "_permissions" : [ { "_read" : true } ] } ] }
+    """

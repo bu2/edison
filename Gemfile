@@ -18,6 +18,7 @@ gem 'multi_json'
 group :development do
   gem 'sinatra-reloader'
   gem 'pry'
+  gem 'pry-doc'
   gem 'pry-byebug'
   gem 'pry-stack_explorer'
 end

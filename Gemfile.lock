@@ -55,6 +55,9 @@ GEM
     pry-byebug (2.0.0)
       byebug (~> 3.4)
       pry (~> 0.10)
+    pry-doc (0.6.0)
+      pry (~> 0.9)
+      yard (~> 0.8)
     pry-stack_explorer (0.4.9.1)
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
@@ -98,6 +101,7 @@ GEM
     tilt (1.4.1)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
+    yard (0.8.7.4)
 
 PLATFORMS
   ruby
@@ -112,6 +116,7 @@ DEPENDENCIES
   omniauth
   pry
   pry-byebug
+  pry-doc
   pry-stack_explorer
   rack-test
   rspec

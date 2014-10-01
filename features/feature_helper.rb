@@ -43,13 +43,21 @@ end
 
 def typify(arg)
   result = arg
+
+  # ... cascading cast ordered by logical priority (as needed only) ...
+
   if arg.empty?
     result = nil
   else
     begin
       result = Integer(arg)
     rescue ArgumentError
-      # ... cascading cast ordered by logical priority (as needed only) ...
+      # failed to parse Integer
+      begin
+        result = parse(arg)
+      rescue MultiJson::ParseError
+        # failed to parse JSON
+      end
     end
   end
   result

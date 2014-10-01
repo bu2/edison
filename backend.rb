@@ -14,6 +14,7 @@ $reserved_keys = [ '_id', '_owner' ]
 
 class ReservedKeyError < Exception; end
 class ObjectDoesNotExist < Exception; end
+class MultipleMatch < Exception; end
 
 
 
@@ -33,12 +34,80 @@ module BackendHelpers
     !session[:uid].nil?
   end
 
+  def current_user
+    session[:uid]
+  end
+
+  def user_roles
+    session[:roles] ||= [ current_user ]
+  end
+
   def collection
     $db[params[:model]]
   end
 
   def authorization(predicates = {})
     predicates.merge({ _owner: session[:uid] })
+  end
+
+  def aggregate_authorization_predicates(required_permissions = [])
+    [ { 
+        '$redact' => {
+          '$cond' => {
+            if: { 
+              '$or' => [
+                        { '$eq' => [ '$_owner', current_user ] },
+                        { '$anyElementTrue' => {
+                            '$ifNull' => [
+                                          { '$map' => {
+                                              input: '$_tags',
+                                              as: 'tag',
+                                              in: {
+                                                '$and' => [
+                                                           { '$gt' => [ { '$size' => { '$setIntersection' => [ user_roles, '$$tag._target' ] } }, 0 ] },
+                                                           { '$setIsSubset' => [ required_permissions, '$$tag._permissions' ] }
+                                                          ]
+                                              }
+                                            } },
+                                          [ ]
+                                         ] 
+                          } } 
+                       ]
+            },
+          then: '$$KEEP',
+          else: '$$PRUNE'
+          }
+        }
+      } ]
+  end
+
+  def selection_predicates(predicates = {})
+    check_reserved_keys(predicates)
+    predicates.merge(authorization)
+  end
+
+  def insertion_attributes(attributes = {})
+    check_reserved_keys(attributes)
+    attributes.merge(authorization)
+  end
+
+  def update_attributes(attributes = {})
+    check_reserved_keys(attributes)
+    attributes.merge(authorization)
+  end
+
+  def list
+    predicates = aggregate_authorization_predicates( [ { _read: true } ] )
+    result = collection.aggregate(predicates)
+    clean_result(result)
+  end
+
+  def retrieve(id)
+    predicates = aggregate_authorization_predicates( [ { _read: true } ] )
+    predicates << { '$match' => { _id: BSON::ObjectId(id) } }
+    result = collection.aggregate(predicates)
+    raise MultipleMatch if result.length > 1
+    clean_result(result[0])
   end
 
   def check_reserved_keys(hash)
@@ -61,39 +130,36 @@ module BackendHelpers
     end
   end
 
-  def selection_predicates(predicates = {})
-    check_reserved_keys(predicates)
-    predicates.merge(authorization)
-  end
-
-  def insertion_attributes(attributes = {})
-    check_reserved_keys(attributes)
-    attributes.merge(authorization)
-  end
-
-  def update_attributes(attributes = {})
-    check_reserved_keys(attributes)
-    attributes.merge(authorization)
+  def clean_tags(result)
+    result['_tags'].delete_if { |tag| (user_roles & tag['_target']).empty? }
+    result['_tags'].each do |tag|
+      tag['_target'].select! { |target| user_roles.include?(target) }
+    end
   end
 
   def clean_one_result(result)
     result['_id'] = result['_id'].to_s
+    if current_user != result['_owner'] and result['_tags']
+      clean_tags(result)
+    end
     result
   end
 
   def clean_result(result)
-    new_result = nil
-    if result.is_a? Mongo::Cursor
-      new_result = []
-      result.each { |one_result| new_result << clean_one_result(one_result) }
-    elsif result.is_a? BSON::OrderedHash
-      new_result = clean_one_result(result)
+    if result.is_a?(Mongo::Cursor)
+      old_result = result
+      result = []
+      old_result.each { |one_result| result << clean_one_result(one_result) }
+    elsif result.is_a?(Array)
+      result.each { |one_result| clean_one_result(one_result) }
+    elsif result.is_a?(BSON::OrderedHash)
+      clean_one_result(result)
     elsif result.nil?
       # new_result = nil      
     else
       raise 'Unhandled Mongo DB result type !'
     end
-    new_result
+    result
   end
 
 end
@@ -173,14 +239,12 @@ end
 # Generic RESTful API
 
 get '/api/:model', provides: :json do |model|
-  result = collection.find(selection_predicates)
-  json clean_result(result)
+  json list
 end
 
 
 get '/api/:model/:id', provides: :json do |model,id|
-  result = collection.find_one(selection_predicates({ _id: BSON::ObjectId(id) }))
-  json clean_result(result)
+  json retrieve(id)
 end
 
 

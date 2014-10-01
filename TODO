@@ -6,13 +6,17 @@ OK  * finish implementation of the generic RESTful API for the simple case (PATC
 OK  * app authentication
 OK  * user-specific authentication
 OK  * user-private data
+  * RBAC and ACL
   * world-public data
-  * ACL and data peer to peer sharing
   * error handling
   * tierce authentication
   * assets
-  * nested resources
   * push notifications
+
+  Future:
+    * public-key end-to-end encryption
+    * nested resources
+    * analytics
   
 
 
