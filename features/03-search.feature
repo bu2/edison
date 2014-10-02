@@ -11,7 +11,7 @@ Feature: Search
     | 541816f042e7d8204d000001 | bob@sponge.com | other    | Clan Castle |     1 | 50000 |     5 |
     | 541816f042e7d8204d000002 | bob@sponge.com | army     | Army Camp   |     3 |   999 |       |
     | 541816f042e7d8204d000003 | bob@sponge.com | resource | Gold Mine   |     3 |       |    30 |
-    When client requests POST /api/buildings/find with JSON: {}
+    When client requests POST /api/buildings/search with JSON: {}
     Then response status should be 200
     And response body should be JSON:
     """
@@ -26,7 +26,7 @@ Feature: Search
     | 541816f042e7d8204d000001 | bob@sponge.com | other    | Clan Castle |     1 | 50000 |     5 |
     | 541816f042e7d8204d000002 | bob@sponge.com | army     | Army Camp   |     3 |   999 |       |
     | 541816f042e7d8204d000003 | bob@sponge.com | resource | Gold Mine   |     3 |       |    30 |
-    When client requests POST /api/buildings/find with JSON: { "type": "army" }
+    When client requests POST /api/buildings/search with JSON: { "type": "army" }
     Then response status should be 200
     And response body should be JSON:
     """
@@ -39,7 +39,7 @@ Feature: Search
     | 541816f042e7d8204d000001 | bob@sponge.com | other    | Clan Castle |     1 | 50000 |     5 |
     | 541816f042e7d8204d000002 | bob@sponge.com | army     | Army Camp   |     3 |   999 |       |
     | 541816f042e7d8204d000003 | bob@sponge.com | resource | Gold Mine   |     3 |       |    30 |
-    When client requests POST /api/buildings/find with JSON: { "level": 3 }
+    When client requests POST /api/buildings/search with JSON: { "level": 3 }
     Then response status should be 200
     And response body should be JSON:
     """
@@ -53,7 +53,7 @@ Feature: Search
     | 541816f042e7d8204d000001 | bob@sponge.com | other    | Clan Castle |     1 | 50000 |     5 |
     | 541816f042e7d8204d000002 | bob@sponge.com | army     | Army Camp   |     3 |   999 |       |
     | 541816f042e7d8204d000003 | bob@sponge.com | resource | Gold Mine   |     3 |       |    30 |
-    When client requests POST /api/buildings/find with JSON: { "gold": { "$gt": 10000 } }
+    When client requests POST /api/buildings/search with JSON: { "gold": { "$gt": 10000 } }
     Then response status should be 200
     And response body should be JSON:
     """
@@ -66,7 +66,7 @@ Feature: Search
     | 541816f042e7d8204d000001 | bob@sponge.com | other    | Clan Castle |     1 | 50000 |     5 |
     | 541816f042e7d8204d000002 | bob@sponge.com | army     | Army Camp   |     3 |   999 |       |
     | 541816f042e7d8204d000003 | bob@sponge.com | resource | Gold Mine   |     3 |       |    30 |
-    When client requests POST /api/buildings/find with JSON: { "$or": [ { "gold": null }, { "troop": null } ] }
+    When client requests POST /api/buildings/search with JSON: { "$or": [ { "gold": null }, { "troop": null } ] }
     Then response status should be 200
     And response body should be JSON:
     """

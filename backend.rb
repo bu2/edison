@@ -50,64 +50,81 @@ module BackendHelpers
     predicates.merge({ _owner: session[:uid] })
   end
 
-  def aggregate_authorization_predicates(required_permissions = [])
-    [ { 
-        '$redact' => {
-          '$cond' => {
-            if: { 
-              '$or' => [
-                        { '$eq' => [ '$_owner', current_user ] },
-                        { '$anyElementTrue' => {
-                            '$ifNull' => [
-                                          { '$map' => {
-                                              input: '$_tags',
-                                              as: 'tag',
-                                              in: {
-                                                '$and' => [
-                                                           { '$gt' => [ { '$size' => { '$setIntersection' => [ user_roles, '$$tag._target' ] } }, 0 ] },
-                                                           { '$setIsSubset' => [ required_permissions, '$$tag._permissions' ] }
-                                                          ]
-                                              }
-                                            } },
-                                          [ ]
-                                         ] 
-                          } } 
-                       ]
-            },
-          then: '$$KEEP',
-          else: '$$PRUNE'
-          }
-        }
-      } ]
+  def authorization_predicates(required_permissions = [])
+    { '$or' => [ { _owner: current_user },
+                 { _tags: 
+                   { '$elemMatch' =>
+                     { _target: 
+                       { '$elemMatch' =>
+                         { '$eq' => current_user }
+                       },
+                       _permissions:
+                       { '$all' => required_permissions }
+                     }
+                   }
+                 }
+               ]
+    }
   end
 
-  def selection_predicates(predicates = {})
-    check_reserved_keys(predicates)
-    predicates.merge(authorization)
+  def selection_predicates(predicates = nil, required_permissions = [{ _read: true }])
+    if predicates
+      check_reserved_keys(predicates)
+      { '$and' =>
+        [ authorization_predicates(required_permissions),
+          predicates
+        ]
+      }
+    else
+      authorization_predicates(required_permissions)
+    end
   end
 
   def insertion_attributes(attributes = {})
-    check_reserved_keys(attributes)
     attributes.merge(authorization)
   end
 
   def update_attributes(attributes = {})
-    check_reserved_keys(attributes)
     attributes.merge(authorization)
   end
 
   def list
-    predicates = aggregate_authorization_predicates( [ { _read: true } ] )
-    result = collection.aggregate(predicates)
+    result = collection.find(selection_predicates)
     clean_result(result)
   end
 
   def retrieve(id)
-    predicates = aggregate_authorization_predicates( [ { _read: true } ] )
-    predicates << { '$match' => { _id: BSON::ObjectId(id) } }
-    result = collection.aggregate(predicates)
-    raise MultipleMatch if result.length > 1
-    clean_result(result[0])
+    result = collection.find_one(selection_predicates( { _id: BSON::ObjectId(id) } ))
+    clean_result(result)
+  end
+
+  def create(attributes)
+    check_reserved_keys(attributes)
+    id = collection.insert(insertion_attributes(attributes))
+    id.to_s
+  end
+
+  def update(id, attributes)
+    check_reserved_keys(attributes)
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), update_attributes(attributes))
+    check_update(result, id)
+  end
+
+  def patch(id, attributes)
+    check_reserved_keys(attributes)
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { '$set' => update_attributes(attributes) })
+    check_update(result, id)
+  end
+
+  def delete(id)
+    result = collection.remove(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { limit: 1 })
+    check_delete(result, id)
+  end
+
+  def search(predicates)
+    check_reserved_keys(predicates)
+    result = collection.find(selection_predicates(predicates))
+    clean_result(result)
   end
 
   def check_reserved_keys(hash)
@@ -251,8 +268,8 @@ end
 post '/api/:model', provides: :json do |model|
   begin
     json = JSON.parse(request.body.read)
-    id = collection.insert(insertion_attributes(json))
-    json( id: id.to_s )
+    id = create(json)
+    json( id: id )
   rescue ReservedKeyError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
@@ -262,9 +279,8 @@ end
 put '/api/:model/:id', provides: :json do |model,id|
   begin
     json = JSON.parse(request.body.read)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), update_attributes(json))
-    check_update(result, id)
-    json( id: id.to_s )
+    update(id, json)
+    json( status: 'ok' )
   rescue ReservedKeyError, ObjectDoesNotExist => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
@@ -274,9 +290,8 @@ end
 patch '/api/:model/:id', provides: :json do |model, id|
   begin
     json = JSON.parse(request.body.read)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), { '$set' => update_attributes(json) })
-    check_update(result, id)
-    json( id: id.to_s )
+    patch(id, json)
+    json( status: 'ok' )
   rescue ReservedKeyError, ObjectDoesNotExist => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
@@ -285,8 +300,7 @@ end
 
 delete '/api/:model/:id', provides: :json do |model,id|
   begin
-    result = collection.remove(selection_predicates({ _id: BSON::ObjectId(id) }), { limit: 1 })
-    check_delete(result, id)
+    delete(id)
     json(status: 'ok')
   rescue ReservedKeyError, ObjectDoesNotExist => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
@@ -294,10 +308,10 @@ delete '/api/:model/:id', provides: :json do |model,id|
 end
 
 
-post '/api/:model/find', provides: :json do |model|
+post '/api/:model/search', provides: :json do |model|
   begin
     json = JSON.parse(request.body.read)
-    result = collection.find(selection_predicates(json))
+    result = search(json)
     json clean_result(result)
   rescue ReservedKeyError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]

@@ -62,8 +62,10 @@ Feature: RESTfulness
     "level": 1 }
     """
     Then response status should be 200
-    And the JSON response should have "id"
-    And the JSON response at "id" should be "541816f042e7d8204d000001"
+    And response body should be JSON:
+    """
+    { "status": "ok" }
+    """
     And Building with id "541816f042e7d8204d000001" should be JSON:
     """
     { "_id": { "$oid": "541816f042e7d8204d000001" },
@@ -89,8 +91,10 @@ Feature: RESTfulness
     "health_max" : 9999}
     """
     Then response status should be 200
-    And the JSON response should have "id"
-    And the JSON response at "id" should be "541816f042e7d8204d000001"
+    And response body should be JSON:
+    """
+    { "status": "ok" }
+    """
     And Building with id "541816f042e7d8204d000001" should be JSON:
     """
     { "_id": { "$oid": "541816f042e7d8204d000001" },

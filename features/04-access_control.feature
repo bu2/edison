@@ -152,7 +152,7 @@ Feature: Access Control
     | 541816f042e7d8204d000002 | Army Camp |     3 | bob@sponge.com |
     | 541816f042e7d8204d000003 | Gold Mine |     3 | bob@sponge.com |
     And client is authenticated as John
-    When client requests POST /api/buildings/find with JSON:
+    When client requests POST /api/buildings/search with JSON:
     """
     { }
     """
@@ -161,7 +161,7 @@ Feature: Access Control
     """
     [ ] 
     """
-    When client requests POST /api/buildings/find with JSON:
+    When client requests POST /api/buildings/search with JSON:
     """
     { "level": 3 }
     """
@@ -170,12 +170,12 @@ Feature: Access Control
     """
     [ ] 
     """
-    When client requests POST /api/buildings/find with JSON:
+    When client requests POST /api/buildings/search with JSON:
     """
     { "_id": "541816f042e7d8204d000001" }
     """
     Then response status should be 422
-    When client requests POST /api/buildings/find with JSON:
+    When client requests POST /api/buildings/search with JSON:
     """
     { "_owner": "bob@sponge.com" }
     """
@@ -204,4 +204,11 @@ Feature: Access Control
       "level" : 3,
       "_owner" : "bob@sponge.com",
       "_tags" : [ { "_target" : [ "john@doe.com" ], "_permissions" : [ { "_read" : true } ] } ] }
+    """
+    When client requests POST /api/buildings/search with JSON: { "level": 3 }
+    Then response status should be 200
+    And response body should be JSON:
+    """
+    [ { "_id" : "541816f042e7d8204d000002", "label" : "Army Camp", "level" : 3, "_owner" : "john@doe.com", "_tags" : [ { "_target" : [ "bob@sponge.com", "someoneelse" ], "_permissions" : [ { "_read" : true } ] } ] },
+{ "_id" : "541816f042e7d8204d000003", "label" : "Gold Mine", "level" : 3, "_owner" : "bob@sponge.com", "_tags" : [ { "_target" : [ "john@doe.com" ], "_permissions" : [ { "_read" : true } ] } ] } ]
     """
