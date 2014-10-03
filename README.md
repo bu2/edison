@@ -61,7 +61,7 @@ What next?
 ----------
 
 * See INSTALL
-* Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.hmtl
+* Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.html
 * See TODO
 
 Contact:
