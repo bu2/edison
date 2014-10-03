@@ -14,6 +14,7 @@ Requirements:
   2014-10-03T21:12:22.990+0200 [initandlisten] waiting for connections on port 27017
 
   * Open another terminal and run:
+  $ bundle install
   $ bundle exec cucumber
   # if everything is green, run:
   $ bundle exec ruby backend.rb
