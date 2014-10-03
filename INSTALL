@@ -1,0 +1,24 @@
+Install on your local computer for development:
+-----------------------------------------------
+
+Requirements:
+  * Ruby 2.1
+  * Rubygem 2.2.2
+  * Bundler 1.6.2
+  * MongoDB 2.6.4
+
+  * Open one terminal and run:
+  $ ./mongo.sh
+  # Wait until it says:
+    ...  
+  2014-10-03T21:12:22.990+0200 [initandlisten] waiting for connections on port 27017
+
+  * Open another terminal and run:
+  $ bundle exec cucumber
+  # if everything is green, run:
+  $ bundle exec ruby backend.rb
+
+Install on Heroku:
+------------------
+
+One-push button coming very soon...
