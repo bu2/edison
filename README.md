@@ -58,6 +58,13 @@ Cient:
     - REST API calls
     - json2object mapper (iOS/Android...)
 
+What next?
+----------
+
+See INSTALL
+Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.hmtl
+See TODO
+
 Contact:
 --------
 
