@@ -1,5 +1,5 @@
-The Edison "MBaaS" Framework
-============================
+The Edison "[MBaaS](http://en.wikipedia.org/wiki/Mobile_Backend_as_a_service)" Framework
+========================================================================================
 
 Welcome!
 --------
@@ -9,27 +9,26 @@ It is open source (BSD-style license) and under active development.
 
 Current features:
 -----------------
-  * Generic RESTful controller to store and retrieve semi-structured data (JSON)
-  * Search query
+  * Generic [RESTful](http://en.wikipedia.org/wiki/Representational_state_transfer) controller to store and retrieve semi-structured data ([JSON](http://en.wikipedia.org/wiki/JSON))
+  * Search query using powerful predicates (from [MongoDB](http://docs.mongodb.org/manual/reference/operator/query/))
   * Authentication
   * Private data
-  * Shared data with RBAC and ACL
+  * Shared data with [RBAC](http://en.wikipedia.org/wiki/Role-based_access_control) and [ACL](http://en.wikipedia.org/wiki/Access_control_list)
   * Public data
 
 Coming features:
 ----------------
 
-**(very soon)** Readying for Beta launch at Salesforce $1000000 hackaton:
+**(very soon)** Readying for Beta launch at [Salesforce $1000000 hackaton](https://developer.salesforce.com/million-dollar-hackathon):
 
-CORE:
-- Concurrency & Mutual Exclusion
-- Simple Authentication (email+password)
-- Third-party Authentication 
+  * CORE:
+    - Concurrency & Mutual Exclusion
+    - Simple Authentication (email+password)
+    - Third-party Authentication 
 
-
-ADDONS (find cool external providers):
-- Assets
-- Push Notifications
+  * ADDONS (find cool external providers):
+    - Assets
+    - Push Notifications
 
 **(long-term)** Roadmap:
 
@@ -61,12 +60,12 @@ Cient:
 What next?
 ----------
 
-See INSTALL
-Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.hmtl
-See TODO
+* See INSTALL
+* Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.hmtl
+* See TODO
 
 Contact:
 --------
 
-  * Twitter: @bu2aeon
+  * Twitter: [@bu2aeon](https://twitter.com/bu2aeon)
   * Email: bu2gihtub@gmail.com
