@@ -1,4 +1,20 @@
-TODO:
+Readying for Beta launch at Salesforce $1000000 hackaton:
+---------------------------------------------------------
+
+CORE:
+- Concurrency & Mutual Exclusion
+- Simple Authentication (email+password)
+- Third-party Authentication 
+
+
+ADDONS (find cool external providers):
+- Assets
+- Push Notifications
+
+
+
+Roadmap:
+--------
 
 Server:
 
@@ -6,20 +22,31 @@ OK  * finish implementation of the generic RESTful API for the simple case (PATC
 OK  * app authentication
 OK  * user-specific authentication
 OK  * user-private data
-  * RBAC and ACL
-  * world-public data
-  * error handling
+OK  * RBAC and ACL
+OK  * world-public data
+  * sharing / grant permissions
   * tierce authentication
   * assets
   * push notifications
+  * error handling
 
   Future:
+    * web-based admin
+    * mobile-base admin
+    * analytics	    
     * public-key end-to-end encryption
     * nested resources
-    * analytics
+
+
   
-
-
 Cient:
+------
 
-  * make a very simple app and find a way to add/extract metadata from app's model for "automatic" backend handling
+  * sample apps:
+    - social
+    - e-commerce
+    - media (music/photo/video)
+
+  * client libraries for seamless integration:
+    - REST API calls
+    - json2object mapper (iOS/Android...)
