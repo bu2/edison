@@ -19,7 +19,7 @@ Current features:
 Coming features:
 ----------------
 
-h3. (very soon) Readying for Beta launch at Salesforce $1000000 hackaton:
+**(very soon)** Readying for Beta launch at Salesforce $1000000 hackaton:
 
 CORE:
 - Concurrency & Mutual Exclusion
@@ -31,7 +31,7 @@ ADDONS (find cool external providers):
 - Assets
 - Push Notifications
 
-h3. (long-term) Roadmap:
+**(long-term)** Roadmap:
 
 Server:
 
