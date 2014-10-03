@@ -130,10 +130,11 @@ Feature: RESTfulness
     { "status": "ok" }
     """
     When client requests GET /api/buildings/541816f042e7d8204d000001
-    Then response status should be 200
+    Then response status should be 422
     And response body should be JSON:
     """
-    null
+    { "status": "Unprocessable Entity",
+      "message": "Object with _id 541816f042e7d8204d000001 not found." }
     """
 
   Scenario: Getting the list of objects

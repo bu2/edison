@@ -17,6 +17,22 @@ $john_auth_hash = {
   "credentials"=>{}, "extra"=>{}
 }
 
+$tom_auth_hash = { 
+  "provider"=>"developer",
+  "uid"=>"tom@cat.com",
+  "info"=>{"name"=>"Tom",
+    "email"=>"tom@cat.com"},
+  "credentials"=>{}, "extra"=>{}
+}
+
+$nobody_auth_hash = { 
+  "provider"=>"developer",
+  "uid"=>"nobody@nowhere.com",
+  "info"=>{"name"=>"Nobody",
+    "email"=>"nobody@nowhere.com"},
+  "credentials"=>{}, "extra"=>{}
+}
+
 
 
 def app
@@ -30,6 +46,16 @@ end
 
 def authenticate_as_john
   OmniAuth.config.add_mock :developer, $john_auth_hash
+  post('/auth/developer/callback')
+end
+
+def authenticate_as_tom
+  OmniAuth.config.add_mock :developer, $tom_auth_hash
+  post('/auth/developer/callback')
+end
+
+def authenticate_as_nobody
+  OmniAuth.config.add_mock :developer, $nobody_auth_hash
   post('/auth/developer/callback')
 end
 

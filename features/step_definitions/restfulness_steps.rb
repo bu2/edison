@@ -36,7 +36,6 @@ end
 
 
 
-
 Then(/^response status should be (\d+)$/) do |expected_status|
   expect(last_response.status).to be expected_status.to_i
 end
@@ -44,4 +43,3 @@ end
 Then(/^response body should be JSON:$/) do |string|
   expect(parse(last_response.body)).to eq(parse(string))
 end
-

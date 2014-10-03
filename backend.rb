@@ -3,18 +3,21 @@ Bundler.require
 
 require 'sinatra/reloader' if development?
 
+require 'set'
+
 
 
 $mongo = Mongo::MongoClient.new
 $db = $mongo['app']
 
-$reserved_keys = [ '_id', '_owner' ]
+$reserved_keys = [ '_id', '_owner', '_tags' ]
 
 
 
+class ForbiddenError < Exception; end
 class ReservedKeyError < Exception; end
-class ObjectDoesNotExist < Exception; end
-class MultipleMatch < Exception; end
+class InvalidTagError < Exception; end
+class ObjectNotFoundError < Exception; end
 
 
 
@@ -38,8 +41,12 @@ module BackendHelpers
     session[:uid]
   end
 
+  def public_role
+    'public'
+  end
+
   def user_roles
-    session[:roles] ||= [ current_user ]
+    session[:roles] ||= [ current_user, public_role ]
   end
 
   def collection
@@ -54,10 +61,8 @@ module BackendHelpers
     { '$or' => [ { _owner: current_user },
                  { _tags: 
                    { '$elemMatch' =>
-                     { _target: 
-                       { '$elemMatch' =>
-                         { '$eq' => current_user }
-                       },
+                     { _targets: 
+                       { '$in' => user_roles },
                        _permissions:
                        { '$all' => required_permissions }
                      }
@@ -95,6 +100,7 @@ module BackendHelpers
 
   def retrieve(id)
     result = collection.find_one(selection_predicates( { _id: BSON::ObjectId(id) } ))
+    check_retrieve(result, id)
     clean_result(result)
   end
 
@@ -127,6 +133,13 @@ module BackendHelpers
     clean_result(result)
   end
 
+  def share(id, tags)
+    check_ownership(id)
+    check_tags(tags)
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), { '$set' => update_attributes({ _tags: tags }) })
+    check_update(result, id)
+  end
+
   def check_reserved_keys(hash)
     $reserved_keys.each do |key|
       if hash.has_key? key
@@ -135,22 +148,53 @@ module BackendHelpers
     end
   end
 
+  def check_ownership(id = '<unknown>')
+    result = retrieve(id)
+    raise ForbiddenError.new("You can not grant permissions on this object with _id #{id}.") unless result['_owner'] == current_user
+  end
+
+  def check_tags(tags)
+    raise InvalidTagError.new unless tags.is_a?(Array)
+    tags.each do |tag|
+      raise InvalidTagError.new unless tag.is_a?(Hash)
+      raise InvalidTagError.new unless tag.keys == [ '_targets', '_permissions' ]
+      raise InvalidTagError.new unless tag['_targets'].is_a?(Array)
+      raise InvalidTagError.new unless tag['_permissions'].is_a?(Array)
+      permission_keys = []
+      permission_values = []
+      tag['_permissions'].each do |permission|
+        raise InvalidTagError.new unless permission.size == 1
+        temp = permission.first
+        permission_keys << temp[0]
+        permission_values << temp[1]
+      end
+      raise InvalidTagError.new unless Set.new(permission_keys) <= Set.new([ '_read', '_write' ])
+      raise InvalidTagError.new unless Set.new(permission_values) <= Set.new([ true, false ])
+    end
+  end
+
+  def check_retrieve(result, id = '<unknown>')
+    if result.nil?
+      raise ObjectNotFoundError.new "Object with _id #{id} not found."
+    end
+  end
+
   def check_update(result, id = '<unknown>')
     if result['ok'] != 1 or result['n'] != 1
-      raise ObjectDoesNotExist.new "Object with _id #{id} does not exist."
+      raise ObjectNotFoundError.new "Object with _id #{id} not found."
     end
   end
 
   def check_delete(result, id = '<unknown>')
     if result['ok'] != 1 or result['n'] != 1
-      raise ObjectDoesNotExist.new "Object with _id #{id} does not exist."
+      raise ObjectNotFoundError.new "Object with _id #{id} not found."
     end
   end
 
   def clean_tags(result)
-    result['_tags'].delete_if { |tag| (user_roles & tag['_target']).empty? }
+    result['_tags'].delete_if { |tag| (user_roles & tag['_targets']).empty? }
     result['_tags'].each do |tag|
-      tag['_target'].select! { |target| user_roles.include?(target) }
+      tag['_targets'].select! { |target| user_roles.include?(target) }
     end
   end
 
@@ -188,7 +232,11 @@ error ReservedKeyError do
   [ 422, 'Unprocessable Entity' ]
 end
 
-error ObjectDoesNotExist do
+error InvalidTagError do
+  [ 422, 'Unprocessable Entity' ]
+end
+
+error ObjectNotFoundError do
   [ 422, 'Unprocessable Entity' ]
 end
 
@@ -261,13 +309,17 @@ end
 
 
 get '/api/:model/:id', provides: :json do |model,id|
-  json retrieve(id)
+  begin
+    json retrieve(id)
+  rescue ObjectNotFoundError => e
+    [ 422, json( status: 'Unprocessable Entity', message: e.message )]
+  end
 end
 
 
 post '/api/:model', provides: :json do |model|
   begin
-    json = JSON.parse(request.body.read)
+    json = MultiJson.load(request.body.read)
     id = create(json)
     json( id: id )
   rescue ReservedKeyError => e
@@ -278,10 +330,10 @@ end
 
 put '/api/:model/:id', provides: :json do |model,id|
   begin
-    json = JSON.parse(request.body.read)
+    json = MultiJson.load(request.body.read)
     update(id, json)
     json( status: 'ok' )
-  rescue ReservedKeyError, ObjectDoesNotExist => e
+  rescue ReservedKeyError, ObjectNotFoundError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
@@ -289,10 +341,10 @@ end
 
 patch '/api/:model/:id', provides: :json do |model, id|
   begin
-    json = JSON.parse(request.body.read)
+    json = MultiJson.load(request.body.read)
     patch(id, json)
     json( status: 'ok' )
-  rescue ReservedKeyError, ObjectDoesNotExist => e
+  rescue ReservedKeyError, ObjectNotFoundError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
@@ -302,7 +354,7 @@ delete '/api/:model/:id', provides: :json do |model,id|
   begin
     delete(id)
     json(status: 'ok')
-  rescue ReservedKeyError, ObjectDoesNotExist => e
+  rescue ReservedKeyError, ObjectNotFoundError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
@@ -310,12 +362,21 @@ end
 
 post '/api/:model/search', provides: :json do |model|
   begin
-    json = JSON.parse(request.body.read)
-    result = search(json)
-    json clean_result(result)
+    json = MultiJson.load(request.body.read)
+    json search(json)
   rescue ReservedKeyError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
 
+
+post '/api/:model/:id/share', provides: :json do |model, id|
+  begin
+    json = MultiJson.load(request.body.read)
+    share(id, json)
+    json(status: 'ok')
+  rescue ForbiddenError, ObjectNotFoundError => e
+    [ 422, json( status: 'Unprocessable Entity', message: e.message )]
+  end
+end
 

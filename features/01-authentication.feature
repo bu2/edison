@@ -13,7 +13,7 @@ Feature: Authentication
       """
 
   Scenario: Authentication success
-    When client requests POST /auth/developer/callback with form parameters: { name: 'Bob', email: 'bob@yankee.com' }
+    When client requests POST /auth/developer/callback with form parameters: { name: 'Bob', email: 'bob@sponge.com' }
     Then response status should be 200
     And response body should be JSON:
       """

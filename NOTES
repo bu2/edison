@@ -1,88 +1,12 @@
-MongoDB 2.6.4 based4f RBAC & ACLs management (per-document granularity)
+Readying for Beta launch at Salesforce $1000000 hackaton:
+---------------------------------------------------------
+
+CORE:
+- Concurrency & Mutual Exclusion
+- Simple Authentication (email+password)
+- Third-party Authentication 
 
 
-{ "_id" : ObjectId("541816f042e7d8204d000001"), "label" : "Town Hall", "level" : 3, "_owner" : "bob@sponge.com", "_tags" : [ ] }
-{ "_id" : ObjectId("541816f042e7d8204d000002"), "label" : "Army Camp", "level" : 3, "_owner" : "john@doe.com", "_tags" : [ { "_target" : [ "bob@sponge.com", "someoneelse" ], "_permissions" : [ { "_read" : true }, { "_write" : false } ] } ] }
-{ "_id" : ObjectId("541816f042e7d8204d000003"), "label" : "Gold Mine", "level" : 3, "_owner" : "bob@sponge.com", "_tags" : [ { "_target" : [ "foo", "john@doe.com", "bar" ], "_permissions" : [ { "_read" : true }, { "_write" : true } ] } ] }
-
-
-var currentUser = 'hacker'
-var userRoles = [ 'baz', 'qux' ]
-var requiredPermissions = [ ]
-
-var currentUser = 'bob@sponge.com'
-var userRoles = [ 'bob@sponge.com', 'other' ]
-var requiredPermissions = [ { _read: true } ]
-
-var currentUser = 'john@doe.com'
-var userRoles = [ 'baz', 'qux', 'john@doe.com' ]
-var requiredPermissions = [ { _read: true}, {_write: true } ]
-
-
-
-Mongo Shell:
-
-db.buildings.aggregate(
-  [ { 
-      $redact: {
-        $cond: {
-          if: { 
-	    $or: [
-              { $eq: [ "$_owner", currentUser ] },
-              { $anyElementTrue: {
-	        $ifNull: [
-                  { $map: {
-                    input: "$_tags",
-                    as: "tag",
-                    in: {
-                      $and: [
-                        { $gt: [ { $size: { $setIntersection: [ userRoles, "$$tag._target" ] } }, 0 ] },
-                        { $setIsSubset: [ requiredPermissions, "$$tag._permissions" ] }
-                      ]
-                    }
-                  } },
-                  [ ]
-                ]
-              } } 
-            ]
-          },
-          then: "$$KEEP",
-          else: "$$PRUNE"
-        }
-      }
-  } ]
-)
-
-
-
-Ruby:
-
-collection.aggregate(
-  [ { 
-      '$redact' => {
-        '$cond' => {
-          if: { 
-	    '$or' => [
-              { '$eq' => [ '$_owner', currentUser ] },
-              { '$anyElementTrue' => { 
-                '$map' => {
-                  input: '$_tags',
-                  as: 'tag',
-                  in: {
-                    '$and' => [
-                      { '$gt' => [ { '$size' => { '$setIntersection' => [ userRoles, '$$tag._target' ] } }, 0 ] },
-                      { '$setIsSubset' => [ requiredPermissions, '$$tag._permissions' ] }
-                    ]
-                  }
-                } 
-              } } 
-            ]
-          },
-          then: '$$KEEP',
-          else: '$$PRUNE'
-        }
-      }
-  } ]
-)
-
-
+ADDONS (find cool external providers):
+- Assets
+- Push Notifications
