@@ -60,7 +60,7 @@ Cient:
 What next?
 ----------
 
-* See INSTALL
+* See INSTALL or just [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 * Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.html
 * See TODO
 

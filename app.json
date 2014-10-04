@@ -1,0 +1,20 @@
+{
+  "name": "Edison",
+  "description": "The quickest way to to get a mobile backend for your app.",
+  "repository": "https://github.com/bu2/edison",
+  "logo": "http://upload.wikimedia.org/wikipedia/commons/3/3c/Crystal_Clear_app_ktip.svg",
+  "keywords": [
+    "mbaas",
+    "mobile",
+    "app",
+    "rest",
+    "json"
+  ],
+  "addons": [
+    "mongohq:sandbox"
+  ],
+  "env": {
+    "LANG": "en_US.UTF-8",
+    "RACK_ENV": "heroku"
+  }
+}
