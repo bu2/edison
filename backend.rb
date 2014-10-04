@@ -7,6 +7,11 @@ require 'set'
 require 'uri'
 
 
+
+def heroku?
+  Sinatra::Application.environment == :heroku
+end
+
 def get_connection
   if heroku?
     return @db_connection if @db_connection
