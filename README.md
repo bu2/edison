@@ -4,7 +4,8 @@ The Edison "[MBaaS](http://en.wikipedia.org/wiki/Mobile_Backend_as_a_service)" F
 Welcome!
 --------
 
-Edison is the quickest and easiest way to setup your own mobile backend.
+Edison is the quickest and easiest way to setup your own mobile backend [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy).
+
 It is open source (BSD-style license) and under active development.
 
 Current features:
