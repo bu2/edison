@@ -6,11 +6,12 @@ require 'sinatra/reloader' if development?
 require 'set'
 
 
+def get_connection
+  @mongo ||= Mongo::MongoClient.new
+  @db ||= @mongo['app']
+end
 
-$mongo = Mongo::MongoClient.new
-$db = $mongo['app']
-
-$reserved_keys = [ '_id', '_owner', '_tags' ]
+RESERVED_KEYS = [ '_id', '_owner', '_tags' ]
 
 
 
@@ -21,11 +22,8 @@ class ObjectNotFoundError < Exception; end
 
 
 
-# FIXME: put this in external YAML configuration
-# FIXME: ... and randomize the secret!
 configure do
-  enable :sessions unless test?
-  use Rack::Session::Cookie, secret: 'secret'
+  use Rack::Session::Mongo, get_connection
   use OmniAuth::Strategies::Developer
 end
 
@@ -50,7 +48,7 @@ module BackendHelpers
   end
 
   def collection
-    $db[params[:model]]
+    get_connection[params[:model]]
   end
 
   def authorization(predicates = {})
@@ -141,7 +139,7 @@ module BackendHelpers
   end
 
   def check_reserved_keys(hash)
-    $reserved_keys.each do |key|
+    RESERVED_KEYS.each do |key|
       if hash.has_key? key
         raise ReservedKeyError.new("You can not choose or modify '#{key}' field.")
       end
