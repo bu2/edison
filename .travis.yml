@@ -1,5 +1,5 @@
 language: ruby
-rvm: 2.1
+rvm: 2.1.2
 before_install: ./before_install.sh
 install: ./install.sh
 script: ./test.sh
