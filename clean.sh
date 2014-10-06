@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm -Rfv mongodb cookie *.html *.json *.log *~ \#*
+rm -Rfv mongodb cookie *.html *.log *~ \#*
