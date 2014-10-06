@@ -394,4 +394,3 @@ post '/api/:model/:id/share', provides: :json do |model, id|
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
-

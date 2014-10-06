@@ -1,5 +1,10 @@
 language: ruby
 rvm: 2.1.2
-before_install: ./before_install.sh
-install: ./install.sh
-script: ./test.sh
+before_install: "./before_install.sh"
+deploy:
+  provider: heroku
+  api_key:
+    secure: JZMFq0g13JWkQt+kHFBg9RqQ2StMk+fCLNSFctHWJ3uhDoi1C4sbjOxXS148TDVGVGck5CPyOp0dCtrujLR61uF2AYpCNeN2Ly2bTm+XnpWsTH1eKBRsPvSGGWrm2Yz0DuT2YNSKG3PLAHVD6HzmchZI1zpH/hMhgJUUQaO9BJk=
+  app: edison-travis
+  on:
+    repo: bu2/edison
