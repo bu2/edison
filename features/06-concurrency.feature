@@ -1,6 +1,9 @@
 Feature: Concurrency
   The backend provides mutual exclusion when accessing shared data.
 
+  Background:
+    Given client accepts JSON
+  
   Scenario: Bob can acquire the lock to avoid concurrent write accesses
     Given the system only knows those Buildings:
     | _id                      | label     | level | _owner         | _tags                                                                          |
