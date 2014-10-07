@@ -76,6 +76,10 @@ def typify(arg)
 
   if arg.empty?
     result = nil
+  elsif arg == 'true'
+    result = true
+  elsif arg == 'false'
+    result = false
   else
     begin
       result = Integer(arg)
@@ -90,3 +94,4 @@ def typify(arg)
   end
   result
 end
+

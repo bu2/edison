@@ -17,8 +17,8 @@ def get_connection
     return @db_connection if @db_connection
     db = URI.parse(ENV['MONGOHQ_URL'])
     db_name = db.path.gsub(/^\//, '')
-    @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
-    @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
+    @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name) 
+   @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
     @db_connection
   else
     @mongo ||= Mongo::MongoClient.new
@@ -36,6 +36,7 @@ class ForbiddenError < Exception; end
 class ReservedKeyError < Exception; end
 class InvalidTagError < Exception; end
 class ObjectNotFoundError < Exception; end
+class LockError < Exception; end
 
 
 
@@ -105,7 +106,7 @@ module BackendHelpers
   end
 
   def update_attributes(attributes = {})
-    attributes.merge(authorization)
+    attributes
   end
 
   def list
@@ -155,6 +156,14 @@ module BackendHelpers
     check_update(result, id)
   end
 
+  def lock(id)
+    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => update_attributes({ _lock: true }) })
+    check_lock(result, id)
+    result = collection.find_one(selection_predicates( { _id: BSON::ObjectId(id) } ))
+    check_retrieve(result, id)
+    clean_result(result)
+  end
+
   def check_reserved_keys(hash)
     RESERVED_KEYS.each do |key|
       if hash.has_key? key
@@ -197,6 +206,12 @@ module BackendHelpers
   def check_update(result, id = '<unknown>')
     if result['ok'] != 1 or result['n'] != 1
       raise ObjectNotFoundError.new "Object with _id #{id} not found."
+    end
+  end
+
+  def check_lock(result, id = '<unknown>')
+    if result['ok'] != 1 or result['n'] != 1
+      raise LockError.new "Failed to acquire lock on object with _id #{id}."
     end
   end
 
@@ -394,3 +409,13 @@ post '/api/:model/:id/share', provides: :json do |model, id|
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
   end
 end
+
+
+post '/api/:model/:id/lock', provides: :json do |model, id|
+  begin
+    json lock(id)
+  rescue LockError, ObjectNotFoundError => e
+    [ 422, json( status: 'Unprocessable Entity', message: e.message )]
+  end
+end
+
