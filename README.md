@@ -16,6 +16,7 @@ Current features:
   * Private data
   * Shared data with [RBAC](http://en.wikipedia.org/wiki/Role-based_access_control) and [ACL](http://en.wikipedia.org/wiki/Access_control_list)
   * Public data
+  * Concurrency & Mutual Exclusion
 
 Coming features:
 ----------------
@@ -23,7 +24,6 @@ Coming features:
 **(very soon)** Readying for Beta launch:
 
   * CORE:
-    - Concurrency & Mutual Exclusion
     - Simple Authentication (email+password)
     - Third-party Authentication 
 
