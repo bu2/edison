@@ -106,6 +106,10 @@ module BackendHelpers
   end
 
   def update_attributes(attributes = {})
+    attributes.merge({ _owner: current_user })
+  end
+
+  def patch_attributes(attributes = {})
     attributes
   end
 
@@ -128,18 +132,18 @@ module BackendHelpers
 
   def update(id, attributes)
     check_reserved_keys(attributes)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), update_attributes(attributes))
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, []), update_attributes(attributes))
     check_update(result, id)
   end
 
   def patch(id, attributes)
     check_reserved_keys(attributes)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { '$set' => update_attributes(attributes) })
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes(attributes) })
     check_update(result, id)
   end
 
   def delete(id)
-    result = collection.remove(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { limit: 1 })
+    result = collection.remove(selection_predicates({ _id: BSON::ObjectId(id) }, []), { limit: 1 })
     check_delete(result, id)
   end
 
@@ -152,12 +156,12 @@ module BackendHelpers
   def share(id, tags)
     check_ownership(id)
     check_tags(tags)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), { '$set' => update_attributes({ _tags: tags }) })
+    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }), { '$set' => patch_attributes({ _tags: tags }) })
     check_update(result, id)
   end
 
   def lock(id)
-    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => update_attributes({ _lock: true }) })
+    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes({ _lock: true }) })
     check_lock(result, id)
     result = collection.find_one(selection_predicates( { _id: BSON::ObjectId(id) } ))
     check_retrieve(result, id)

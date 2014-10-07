@@ -92,8 +92,8 @@ Feature: Sharing
     """
     { "status": "ok" }
     """
-    And client is authenticated as John
-    When client requests PUT /api/buildings/541816f042e7d8204d000001 with JSON:
+    When client is authenticated as John
+    And client requests PATCH /api/buildings/541816f042e7d8204d000001 with JSON:
     """
     { "label": "John's Town Hall",
       "level": 999 }
@@ -103,9 +103,10 @@ Feature: Sharing
     """
     { "status": "ok" }
     """
-    When client requests PATCH /api/buildings/541816f042e7d8204d000001 with JSON:
+    When client is authenticated as Tom
+    And client requests PATCH /api/buildings/541816f042e7d8204d000001 with JSON:
     """
-    { "label": "John's Town Hall",
+    { "label": "Tom's Town Hall",
       "level": 999 }
     """
     Then response status should be 200
@@ -113,14 +114,18 @@ Feature: Sharing
     """
     { "status": "ok" }
     """
-    When client requests DELETE /api/buildings/541816f042e7d8204d000001
+    When client is authenticated as Bob
+    And client requests GET /api/buildings/541816f042e7d8204d000001
     Then response status should be 200
     And response body should be JSON:
     """
-    { "status": "ok" }
+    { "_id": "541816f042e7d8204d000001",
+      "label": "Tom's Town Hall",
+      "level": 999,
+      "_owner": "bob@sponge.com",
+      "_tags": [ { "_targets": ["public"],
+                   "_permissions": [ {"_read":true}, {"_write":true} ] } ] }
     """
-    When client requests GET /api/buildings/541816f042e7d8204d000001
-    Then response status should be 422
 
   Scenario: Bob can grant read access to John only
     Given the system only knows those Buildings:

@@ -221,41 +221,17 @@ Feature: Access Control
     | 541816f042e7d8204d000002 | Army Camp |     3 | john@doe.com   | [ { "_targets" : [ "bob@sponge.com", "someoneelse" ], "_permissions" : [ { "_read" : true } ] } ]         |
     | 541816f042e7d8204d000003 | Gold Mine |     3 | bob@sponge.com | [ { "_targets" : [ "john@doe.com", "bar" ], "_permissions" : [ { "_read" : true}, {"_write": true} ] } ]  |
     And client is authenticated as John
-    When client requests PUT /api/buildings/541816f042e7d8204d000001 with JSON:
-    """
-    { "label": "John's Town Hall",
-      "level": 999 }
-    """
-    Then response status should be 422
     When client requests PATCH /api/buildings/541816f042e7d8204d000001 with JSON:
     """
     { "label": "John's Town Hall",
       "level": 999 }
     """
     Then response status should be 422
-    When client requests DELETE /api/buildings/541816f042e7d8204d000001
-    Then response status should be 422
-    When client requests PUT /api/buildings/541816f042e7d8204d000003 with JSON:
-    """
-    { "label": "John's Town Hall",
-      "level": 999 }
-    """
-    Then response status should be 200
-    And response body should be JSON:
-    """
-    { "status": "ok" }
-    """
     When client requests PATCH /api/buildings/541816f042e7d8204d000003 with JSON:
     """
     { "label": "John's Town Hall",
       "level": 999 }
     """
-    Then response status should be 200
-    And response body should be JSON:
-    """
-    { "status": "ok" }
-    """
-    When client requests DELETE /api/buildings/541816f042e7d8204d000003
     Then response status should be 200
     And response body should be JSON:
     """
