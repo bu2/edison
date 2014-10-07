@@ -22,6 +22,10 @@ When(/^client requests POST (.*?) with JSON:$/) do |url, string|
   post url, parse(string).to_json, { 'CONTENT_TYPE' => 'application/json' }
 end
 
+When(/^client requests POST (.*?) with JSON: (.+?)$/) do |url, string|
+  post url, parse(string).to_json, { 'CONTENT_TYPE' => 'application/json' }
+end
+
 When(/^client requests PUT (.*?) with JSON:$/) do |url, string|
   put url, parse(string).to_json, { 'CONTENT_TYPE' => 'application/json' }
 end

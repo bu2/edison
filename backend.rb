@@ -138,7 +138,7 @@ module BackendHelpers
 
   def patch(id, attributes)
     check_reserved_keys(attributes)
-    result = collection.update(selection_predicates({ _id: BSON::ObjectId(id) }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes(attributes) })
+    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: current_user}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes(attributes) })
     check_update(result, id)
   end
 
@@ -161,7 +161,7 @@ module BackendHelpers
   end
 
   def lock(id)
-    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes({ _lock: true }) })
+    result = collection.update(selection_predicates({ '$and' => [ _id: BSON::ObjectId(id), '$or' => [{_lock: {'$exists'=>false}}, {_lock: false}] ] }, [ {_read: true}, {_write: true} ]), { '$set' => patch_attributes({ _lock: current_user }) })
     check_lock(result, id)
     result = collection.find_one(selection_predicates( { _id: BSON::ObjectId(id) } ))
     check_retrieve(result, id)
@@ -232,10 +232,17 @@ module BackendHelpers
     end
   end
 
+  def clean_lock(result)
+    if result['_lock'] and result['_lock'] != current_user
+      result['_lock'] = true
+    end
+  end
+
   def clean_one_result(result)
     result['_id'] = result['_id'].to_s
-    if current_user != result['_owner'] and result['_tags']
-      clean_tags(result)
+    if current_user != result['_owner']
+      clean_tags(result) if result['_tags']
+      clean_lock(result)
     end
     result
   end
