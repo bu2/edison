@@ -1,6 +1,8 @@
 $mongo = Mongo::MongoClient.new
 $db = $mongo['app']
 
+
+
 $bob_auth_hash = { 
   "provider"=>"developer",
   "uid"=>"bob@sponge.com",

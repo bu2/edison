@@ -2,8 +2,7 @@ Install on your local computer for development:
 -----------------------------------------------
 
 Requirements:
-  * Ruby 2.1
-  * Rubygem 2.2.2
+  * Ruby 2.1.2
   * Bundler 1.6.2
   * MongoDB 2.6.4
 
@@ -22,4 +21,4 @@ Requirements:
 Install on Heroku:
 ------------------
 
-One-push button coming very soon...
+One-push button available on: https://github.com/bu2/edison

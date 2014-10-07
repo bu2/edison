@@ -1,5 +1,5 @@
-Readying for Beta launch at Salesforce $1000000 hackaton:
----------------------------------------------------------
+Readying for Beta launch
+------------------------
 
 CORE:
 - Concurrency & Mutual Exclusion
@@ -24,7 +24,7 @@ OK  * user-specific authentication
 OK  * user-private data
 OK  * RBAC and ACL
 OK  * world-public data
-  * sharing / grant permissions
+OK  * sharing / grant permissions
   * tierce authentication
   * assets
   * push notifications

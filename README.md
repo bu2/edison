@@ -20,7 +20,7 @@ Current features:
 Coming features:
 ----------------
 
-**(very soon)** Readying for Beta launch at [Salesforce $1000000 hackaton](https://developer.salesforce.com/million-dollar-hackathon):
+**(very soon)** Readying for Beta launch:
 
   * CORE:
     - Concurrency & Mutual Exclusion

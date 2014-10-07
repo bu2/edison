@@ -61,7 +61,7 @@ module BackendHelpers
   end
 
   def user_roles
-    session[:roles] ||= [ current_user, public_role ]
+    [ current_user, public_role ]
   end
 
   def collection
