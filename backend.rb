@@ -32,6 +32,7 @@ RESERVED_KEYS = [ '_id', '_owner', '_tags' ]
 
 
 
+class LoginError < Exception; end
 class ForbiddenError < Exception; end
 class ReservedKeyError < Exception; end
 class InvalidTagError < Exception; end
@@ -43,11 +44,33 @@ class LockError < Exception; end
 configure do
   use Rack::Session::Mongo, get_connection
   use OmniAuth::Strategies::Developer
+  use OmniAuth::Builder do
+    provider :twitter, ENV['TWITTER_API_KEY'], ENV['TWITTER_API_SECRET']
+  end
 end
 
 
 
 module BackendHelpers
+
+  def login
+    strategy = params[:strategy]
+    if strategy != 'developer'
+      query_key = "#{strategy}.uid"
+      auth = env['omniauth.auth']
+      uid = auth[:uid]
+      user = parse({ strategy => auth }.to_json)
+    
+      result = get_connection['_users'].find_and_modify( { query: { query_key => uid },
+                                                           update: { '$set' => user },
+                                                           upsert: true,
+                                                           new: true } )
+      check_login(result)
+      session[:uid] = result['_id'].to_s
+    else
+      session[:uid] = env['omniauth.auth']['uid']
+    end
+  end
 
   def authenticated?
     !session[:uid].nil?
@@ -168,6 +191,10 @@ module BackendHelpers
     clean_result(result)
   end
 
+  def check_login(result)
+    raise LoginError.new 'Failed to log in.' if result.nil?
+  end
+
   def check_reserved_keys(hash)
     RESERVED_KEYS.each do |key|
       if hash.has_key? key
@@ -223,6 +250,10 @@ module BackendHelpers
     if result['ok'] != 1 or result['n'] != 1
       raise ObjectNotFoundError.new "Object with _id #{id} not found."
     end
+  end
+
+  def parse(string)
+    MultiJson.load(string)
   end
 
   def clean_tags(result)
@@ -327,12 +358,26 @@ end
 
 # Authentication & Session management
 
-post '/auth/developer/callback', provides: :json do
-  session[:uid] = env['omniauth.auth']['uid']
-  session[:user_name] = env['omniauth.auth']['info']['name']
-  session[:user_email] = env['omniauth.auth']['info']['email']
+get '/auth/:strategy/callback', provides: :json do |strategy|
+  begin
+    login
+    json( status: 'ok' )
+  rescue LoginError => e
+    [ 422, json( status: 'Unprocessable Entity', message: e.message )]
+  end
+end
 
-  json(status: 'ok')
+
+post '/auth/:strategy/callback', provides: :json do |strategy|
+  # session[:uid] = env['omniauth.auth']['uid']
+  # session[:user_name] = env['omniauth.auth']['info']['name']
+  # session[:user_email] = env['omniauth.auth']['info']['email']
+  begin
+    login
+    json( status: 'ok' )
+  rescue LoginError => e
+    [ 422, json( status: 'Unprocessable Entity', message: e.message )]
+  end
 end
 
 
@@ -360,7 +405,7 @@ end
 
 post '/api/:model', provides: :json do |model|
   begin
-    json = MultiJson.load(request.body.read)
+    json = parse(request.body.read)
     id = create(json)
     json( id: id )
   rescue ReservedKeyError => e
@@ -371,7 +416,7 @@ end
 
 put '/api/:model/:id', provides: :json do |model,id|
   begin
-    json = MultiJson.load(request.body.read)
+    json = parse(request.body.read)
     update(id, json)
     json( status: 'ok' )
   rescue ReservedKeyError, ObjectNotFoundError => e
@@ -382,7 +427,7 @@ end
 
 patch '/api/:model/:id', provides: :json do |model, id|
   begin
-    json = MultiJson.load(request.body.read)
+    json = parse(request.body.read)
     patch(id, json)
     json( status: 'ok' )
   rescue ReservedKeyError, ObjectNotFoundError => e
@@ -403,7 +448,7 @@ end
 
 post '/api/:model/search', provides: :json do |model|
   begin
-    json = MultiJson.load(request.body.read)
+    json = parse(request.body.read)
     json search(json)
   rescue ReservedKeyError => e
     [ 422, json( status: 'Unprocessable Entity', message: e.message )]
@@ -413,7 +458,7 @@ end
 
 post '/api/:model/:id/share', provides: :json do |model, id|
   begin
-    json = MultiJson.load(request.body.read)
+    json = parse(request.body.read)
     share(id, json)
     json(status: 'ok')
   rescue ForbiddenError, ObjectNotFoundError => e
