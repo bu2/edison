@@ -17,6 +17,7 @@ Current features:
   * Shared data with [RBAC](http://en.wikipedia.org/wiki/Role-based_access_control) and [ACL](http://en.wikipedia.org/wiki/Access_control_list)
   * Public data
   * Concurrency & Mutual Exclusion
+  * Third-party authentication (Twitter, Linkedin)
 
 Coming features:
 ----------------
@@ -24,8 +25,9 @@ Coming features:
 **(very soon)** Readying for Beta launch:
 
   * CORE:
+    - Anonymous authentication
     - Simple Authentication (email+password)
-    - Third-party Authentication 
+    - More third-party authentication (google, facebook, ...) 
 
   * ADDONS (find cool external providers):
     - Assets
@@ -35,7 +37,6 @@ Coming features:
 
 Server:
 
-  * tierce authentication
   * assets
   * push notifications
   * error handling
