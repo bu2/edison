@@ -46,6 +46,7 @@ configure do
   use OmniAuth::Strategies::Developer
   use OmniAuth::Builder do
     provider :twitter, ENV['TWITTER_API_KEY'], ENV['TWITTER_API_SECRET']
+    provider :linkedin, ENV['LINKEDIN_API_KEY'], ENV['LINKEDIN_API_SECRET']
   end
 end
 
