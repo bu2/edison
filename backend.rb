@@ -18,7 +18,7 @@ def get_connection
     db = URI.parse(ENV['MONGOHQ_URL'])
     db_name = db.path.gsub(/^\//, '')
     @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name) 
-   @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
+    @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
     @db_connection
   else
     @mongo ||= Mongo::MongoClient.new
@@ -48,6 +48,7 @@ configure do
     provider :twitter, ENV['TWITTER_API_KEY'], ENV['TWITTER_API_SECRET']
     provider :linkedin, ENV['LINKEDIN_API_KEY'], ENV['LINKEDIN_API_SECRET']
     provider :google_oauth2, ENV['GOOGLE_API_KEY'], ENV['GOOGLE_API_SECRET']
+    provider :facebook, ENV['FACEBOOK_API_KEY'], ENV['FACEBOOK_API_SECRET']
   end
 end
 
