@@ -1,12 +1,9 @@
 The Edison "[MBaaS](http://en.wikipedia.org/wiki/Mobile_Backend_as_a_service)" Framework
 ========================================================================================
 
-Welcome!
---------
+Edison is the quickest and easiest way to setup your own mobile backend.
 
-Edison is the quickest and easiest way to setup your own mobile backend [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy).
-
-It is open source (BSD-style license) and under active development.
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy).
 
 Current features:
 -----------------
@@ -17,7 +14,7 @@ Current features:
   * Shared data with [RBAC](http://en.wikipedia.org/wiki/Role-based_access_control) and [ACL](http://en.wikipedia.org/wiki/Access_control_list)
   * Public data
   * Concurrency & Mutual Exclusion
-  * Third-party authentication (Twitter, Linkedin)
+  * Third-party authentication (Twitter, Linkedin, Google)
 
 Coming features:
 ----------------
@@ -27,7 +24,7 @@ Coming features:
   * CORE:
     - Anonymous authentication
     - Simple Authentication (email+password)
-    - More third-party authentication (google, facebook, ...) 
+    - More third-party authentication (Facebook, ...) 
 
   * ADDONS (find cool external providers):
     - Assets
@@ -62,9 +59,12 @@ Cient:
 What next?
 ----------
 
-* See INSTALL or just [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-* Run `$ bundle exec cucumber --format html >cucumber.html` and open cucumber.html
-* See TODO
+...TBD...
+
+License:
+--------
+
+It is open source (BSD-style license).
 
 Contact:
 --------
