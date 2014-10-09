@@ -16,6 +16,10 @@ Current features:
   * Concurrency & Mutual Exclusion
   * Third-party authentication (Facebook, Twitter, Linkedin, Google)
 
+Documentation:
+--------------
+  * https://www.relishapp.com/bu2/edison/docs
+
 Coming features:
 ----------------
 
