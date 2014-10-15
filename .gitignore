@@ -1,4 +1,6 @@
 mongodb/
+.chrome/
+launch_chrome.sh
 
 *~
 \#*

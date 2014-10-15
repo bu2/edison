@@ -18,10 +18,6 @@ gem 'bson_ext'
 gem 'rack-session-mongo'
 
 gem 'omniauth'
-gem 'omniauth-twitter'
-gem 'omniauth-linkedin-oauth2'
-gem 'omniauth-google-oauth2'
-gem 'omniauth-facebook'
 
 gem 'multi_json'
 

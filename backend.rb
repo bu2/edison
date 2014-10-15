@@ -43,13 +43,7 @@ class LockError < Exception; end
 
 configure do
   use Rack::Session::Mongo, get_connection
-  use OmniAuth::Strategies::Developer
-  use OmniAuth::Builder do
-    provider :twitter, ENV['TWITTER_API_KEY'], ENV['TWITTER_API_SECRET']
-    provider :linkedin, ENV['LINKEDIN_API_KEY'], ENV['LINKEDIN_API_SECRET']
-    provider :google_oauth2, ENV['GOOGLE_API_KEY'], ENV['GOOGLE_API_SECRET']
-    provider :facebook, ENV['FACEBOOK_API_KEY'], ENV['FACEBOOK_API_SECRET']
-  end
+  use OmniAuth::Strategies::Developer unless production?
 end
 
 
@@ -372,9 +366,6 @@ end
 
 
 post '/auth/:strategy/callback', provides: :json do |strategy|
-  # session[:uid] = env['omniauth.auth']['uid']
-  # session[:user_name] = env['omniauth.auth']['info']['name']
-  # session[:user_email] = env['omniauth.auth']['info']['email']
   begin
     login
     json( status: 'ok' )
