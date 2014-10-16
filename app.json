@@ -11,7 +11,8 @@
     "json"
   ],
   "addons": [
-    "mongohq:sandbox"
+    "mongohq:sandbox",
+    "oauthio:test"
   ],
   "env": {
     "LANG": "en_US.UTF-8",
