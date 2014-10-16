@@ -1,18 +1,3 @@
-Readying for Beta launch
-------------------------
-
-CORE:
-- Concurrency & Mutual Exclusion
-- Simple Authentication (email+password)
-- Third-party Authentication 
-
-
-ADDONS (find cool external providers):
-- Assets
-- Push Notifications
-
-
-
 Roadmap:
 --------
 
@@ -25,7 +10,7 @@ OK  * user-private data
 OK  * RBAC and ACL
 OK  * world-public data
 OK  * sharing / grant permissions
-  * tierce authentication
+  * tierce authentication with OAuth.io
   * assets
   * push notifications
   * error handling
